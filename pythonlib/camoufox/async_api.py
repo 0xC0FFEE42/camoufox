@@ -1,7 +1,7 @@
 import asyncio
 from functools import partial
 from typing import Any, Dict, Optional, Union, overload
-
+import string
 from playwright.async_api import (
     Browser,
     BrowserContext,
@@ -13,8 +13,8 @@ from typing_extensions import Literal
 from camoufox.virtdisplay import VirtualDisplay
 
 from .utils import async_attach_vd, launch_options
-
-
+import json
+from typing import Callable
 class AsyncCamoufox(PlaywrightContextManager):
     """
     Wrapper around playwright.async_api.PlaywrightContextManager that automatically
@@ -31,12 +31,15 @@ class AsyncCamoufox(PlaywrightContextManager):
             *,
             fingerprint_path: Optional[Union[str, Path]] = None,
             fingerprint_save_path: Optional[Union[str, Path]] = None,
+            storage_state_path: Optional[Union[str, Path]] = None,
+            user_data_dir: Optional[Union[str, Path]] = None,
             **launch_options
     ):
         super().__init__()
         self.launch_options = launch_options
         self.browser: Optional[Union[Browser, BrowserContext]] = None
-
+        self.user_data_dir = user_data_dir
+        self.storage_state_path = storage_state_path
         if fingerprint_path:
             # ✅ 优先使用已有指纹（不会触发 callback）
             path = Path(fingerprint_path).resolve()
@@ -55,10 +58,24 @@ class AsyncCamoufox(PlaywrightContextManager):
 
     async def __aenter__(self) -> Union[Browser, BrowserContext]:
         _playwright = await super().__aenter__()
-        self.browser = await AsyncNewBrowser(_playwright, **self.launch_options)
+        # self.browser = await AsyncNewBrowser(_playwright, **self.launch_options)
+        if self.user_data_dir:
+            self.browser = await _playwright.firefox.launch_persistent_context(
+                user_data_dir=str(Path(self.user_data_dir).resolve()),
+                **self.launch_options
+            )
+        elif self.storage_state_path:
+            browser = await AsyncNewBrowser(_playwright, **self.launch_options)
+            context = await browser.new_context(storage_state=str(self.storage_state_path))
+            self.browser = context
+        else:
+            self.browser = await AsyncNewBrowser(_playwright, **self.launch_options)
+            self.browser = await self.browser.new_context()
         return self.browser
 
     async def __aexit__(self, *args: Any):
+        if self.storage_state_path and isinstance(self.browser, BrowserContext):
+            await self.browser.storage_state(path=str(self.storage_state_path))
         if self.browser:
             await self.browser.close()
         await super().__aexit__(*args)

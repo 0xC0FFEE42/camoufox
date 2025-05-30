@@ -28,7 +28,8 @@ from .pkgman import OS_NAME, get_path, installed_verstr, launch_path
 from .virtdisplay import VirtualDisplay
 from .warnings import LeakWarning
 from .webgl import sample_webgl
-
+import json
+from typing import Callable
 ListOrString: TypeAlias = Union[Tuple[str, ...], List[str], str]
 
 # Camoufox preferences to cache previous pages and requests
