@@ -2,7 +2,6 @@
 /camoufox-*
 /firefox-*
 /mozilla-unified
-dist/
 bin/
 launch
 launch.exe
