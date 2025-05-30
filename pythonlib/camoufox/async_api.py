@@ -2,6 +2,7 @@ import asyncio
 from functools import partial
 from typing import Any, Dict, Optional, Union, overload
 import string
+from pathlib import Path
 from playwright.async_api import (
     Browser,
     BrowserContext,
