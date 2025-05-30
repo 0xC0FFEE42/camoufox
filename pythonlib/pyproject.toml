@@ -44,7 +44,7 @@ lxml = "*"
 language-tags = "*"
 pysocks = "*"
 geoip2 = {version = "*", optional = true}
-
+pydantic = "*"
 [tool.poetry.extras]
 geoip = ["geoip2"]
 
