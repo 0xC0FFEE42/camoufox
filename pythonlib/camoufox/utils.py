@@ -366,6 +366,7 @@ def launch_options(
     debug: Optional[bool] = None,
     virtual_display: Optional[str] = None,
     **launch_options: Dict[str, Any],
+    fingerprint_callback: Optional[Callable[[Fingerprint], None]] = None
 ) -> Dict[str, Any]:
     """
     Launches a new browser instance for Camoufox.
@@ -507,6 +508,8 @@ def launch_options(
             window=window,
             os=os,
         )
+        if fingerprint_callback:
+            fingerprint_callback(fingerprint)
     else:
         # Or use the one passed by the user
         if not i_know_what_im_doing:

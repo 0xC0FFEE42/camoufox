@@ -21,10 +21,37 @@ class AsyncCamoufox(PlaywrightContextManager):
     launches a browser and closes it when the context manager is exited.
     """
 
-    def __init__(self, **launch_options):
+    # def __init__(self, **launch_options):
+    #     super().__init__()
+    #     self.launch_options = launch_options
+    #     self.browser: Optional[Union[Browser, BrowserContext]] = None
+
+    def __init__(
+            self,
+            *,
+            fingerprint_path: Optional[Union[str, Path]] = None,
+            fingerprint_save_path: Optional[Union[str, Path]] = None,
+            **launch_options
+    ):
         super().__init__()
         self.launch_options = launch_options
         self.browser: Optional[Union[Browser, BrowserContext]] = None
+
+        if fingerprint_path:
+            # ✅ 优先使用已有指纹（不会触发 callback）
+            path = Path(fingerprint_path).resolve()
+            with path.open("r") as f:
+                self.launch_options["fingerprint"] = Fingerprint(**json.load(f))
+
+        elif fingerprint_save_path:
+            # ✅ 没有传入指纹时，允许在生成后保存
+            save_path = Path(fingerprint_save_path).resolve()
+
+            def _cb(fp: Fingerprint):
+                with save_path.open("w") as f:
+                    json.dump(fp.model_dump(), f)
+
+            self.launch_options["fingerprint_callback"] = _cb
 
     async def __aenter__(self) -> Union[Browser, BrowserContext]:
         _playwright = await super().__aenter__()
@@ -64,6 +91,7 @@ async def AsyncNewBrowser(
     from_options: Optional[Dict[str, Any]] = None,
     persistent_context: bool = False,
     debug: Optional[bool] = None,
+    fingerprint_callback: Optional[Callable[[Fingerprint], None]] = None,
     **kwargs,
 ) -> Union[Browser, BrowserContext]:
     """
@@ -87,7 +115,8 @@ async def AsyncNewBrowser(
     if not from_options:
         from_options = await asyncio.get_event_loop().run_in_executor(
             None,
-            partial(launch_options, headless=headless, debug=debug, **kwargs),
+            partial(launch_options, headless=headless, debug=debug, fingerprint_callback=fingerprint_callback, **kwargs)
+            # partial(launch_options, headless=headless, debug=debug, **kwargs),
         )
 
     # Persistent context
