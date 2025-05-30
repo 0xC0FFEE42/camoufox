@@ -28,8 +28,7 @@ from .pkgman import OS_NAME, get_path, installed_verstr, launch_path
 from .virtdisplay import VirtualDisplay
 from .warnings import LeakWarning
 from .webgl import sample_webgl
-import json
-from typing import Callable
+
 ListOrString: TypeAlias = Union[Tuple[str, ...], List[str], str]
 
 # Camoufox preferences to cache previous pages and requests
@@ -43,7 +42,7 @@ CACHE_PREFS = {
 
 
 def get_env_vars(
-    config_map: Dict[str, str], user_agent_os: str
+        config_map: Dict[str, str], user_agent_os: str
 ) -> Dict[str, Union[str, float, bool]]:
     """
     Gets a dictionary of environment variables for Camoufox.
@@ -116,7 +115,7 @@ def validate_type(value: Any, expected_type: str) -> bool:
         return isinstance(value, int) or (isinstance(value, float) and value.is_integer())
     elif expected_type == "uint":
         return (
-            isinstance(value, int) or (isinstance(value, float) and value.is_integer())
+                isinstance(value, int) or (isinstance(value, float) and value.is_integer())
         ) and value >= 0
     elif expected_type == "double":
         return isinstance(value, (float, int))
@@ -250,8 +249,8 @@ def set_into(target: Dict[str, Any], key: str, value: Any) -> None:
 
 
 def is_domain_set(
-    config: Dict[str, Any],
-    *properties: str,
+        config: Dict[str, Any],
+        *properties: str,
 ) -> bool:
     """
     Checks if a domain is set in the config.
@@ -274,7 +273,7 @@ def warn_manual_config(config: Dict[str, Any]) -> None:
     """
     # Manual locale setting
     if is_domain_set(
-        config, 'navigator.language', 'navigator.languages', 'headers.Accept-Language', 'locale:'
+            config, 'navigator.language', 'navigator.languages', 'headers.Accept-Language', 'locale:'
     ):
         LeakWarning.warn('locale', False)
     # Manual geolocation and timezone setting
@@ -292,7 +291,7 @@ def warn_manual_config(config: Dict[str, Any]) -> None:
 
 
 async def async_attach_vd(
-    browser: Any, virtual_display: Optional[VirtualDisplay] = None
+        browser: Any, virtual_display: Optional[VirtualDisplay] = None
 ) -> Any:  # type: ignore
     """
     Attaches the virtual display to the async browser cleanup
@@ -314,7 +313,7 @@ async def async_attach_vd(
 
 
 def sync_attach_vd(
-    browser: Any, virtual_display: Optional[VirtualDisplay] = None
+        browser: Any, virtual_display: Optional[VirtualDisplay] = None
 ) -> Any:  # type: ignore
     """
     Attaches the virtual display to the sync browser cleanup
@@ -336,38 +335,37 @@ def sync_attach_vd(
 
 
 def launch_options(
-    *,
-    config: Optional[Dict[str, Any]] = None,
-    os: Optional[ListOrString] = None,
-    block_images: Optional[bool] = None,
-    block_webrtc: Optional[bool] = None,
-    block_webgl: Optional[bool] = None,
-    disable_coop: Optional[bool] = None,
-    webgl_config: Optional[Tuple[str, str]] = None,
-    geoip: Optional[Union[str, bool]] = None,
-    humanize: Optional[Union[bool, float]] = None,
-    locale: Optional[Union[str, List[str]]] = None,
-    addons: Optional[List[str]] = None,
-    fonts: Optional[List[str]] = None,
-    custom_fonts_only: Optional[bool] = None,
-    exclude_addons: Optional[List[DefaultAddons]] = None,
-    screen: Optional[Screen] = None,
-    window: Optional[Tuple[int, int]] = None,
-    fingerprint: Optional[Fingerprint] = None,
-    ff_version: Optional[int] = None,
-    headless: Optional[bool] = None,
-    main_world_eval: Optional[bool] = None,
-    executable_path: Optional[Union[str, Path]] = None,
-    firefox_user_prefs: Optional[Dict[str, Any]] = None,
-    proxy: Optional[Dict[str, str]] = None,
-    enable_cache: Optional[bool] = None,
-    args: Optional[List[str]] = None,
-    env: Optional[Dict[str, Union[str, float, bool]]] = None,
-    i_know_what_im_doing: Optional[bool] = None,
-    debug: Optional[bool] = None,
-    virtual_display: Optional[str] = None,
-    fingerprint_callback: Optional[Callable[[Fingerprint], None]] = None,
-    **launch_options: Dict[str, Any]
+        *,
+        config: Optional[Dict[str, Any]] = None,
+        os: Optional[ListOrString] = None,
+        block_images: Optional[bool] = None,
+        block_webrtc: Optional[bool] = None,
+        block_webgl: Optional[bool] = None,
+        disable_coop: Optional[bool] = None,
+        webgl_config: Optional[Tuple[str, str]] = None,
+        geoip: Optional[Union[str, bool]] = None,
+        humanize: Optional[Union[bool, float]] = None,
+        locale: Optional[Union[str, List[str]]] = None,
+        addons: Optional[List[str]] = None,
+        fonts: Optional[List[str]] = None,
+        custom_fonts_only: Optional[bool] = None,
+        exclude_addons: Optional[List[DefaultAddons]] = None,
+        screen: Optional[Screen] = None,
+        window: Optional[Tuple[int, int]] = None,
+        fingerprint: Optional[Fingerprint] = None,
+        ff_version: Optional[int] = None,
+        headless: Optional[bool] = None,
+        main_world_eval: Optional[bool] = None,
+        executable_path: Optional[Union[str, Path]] = None,
+        firefox_user_prefs: Optional[Dict[str, Any]] = None,
+        proxy: Optional[Dict[str, str]] = None,
+        enable_cache: Optional[bool] = None,
+        args: Optional[List[str]] = None,
+        env: Optional[Dict[str, Union[str, float, bool]]] = None,
+        i_know_what_im_doing: Optional[bool] = None,
+        debug: Optional[bool] = None,
+        virtual_display: Optional[str] = None,
+        **launch_options: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
     Launches a new browser instance for Camoufox.
@@ -509,8 +507,6 @@ def launch_options(
             window=window,
             os=os,
         )
-        if fingerprint_callback:
-            fingerprint_callback(fingerprint)
     else:
         # Or use the one passed by the user
         if not i_know_what_im_doing:
@@ -570,9 +566,9 @@ def launch_options(
     # Raise a warning when a proxy is being used without spoofing geolocation.
     # This is a very bad idea; the warning cannot be ignored with i_know_what_im_doing.
     elif (
-        proxy
-        and 'localhost' not in proxy.get('server', '')
-        and not is_domain_set(config, 'geolocation')
+            proxy
+            and 'localhost' not in proxy.get('server', '')
+            and not is_domain_set(config, 'geolocation')
     ):
         LeakWarning.warn('proxy_without_geoip')
 

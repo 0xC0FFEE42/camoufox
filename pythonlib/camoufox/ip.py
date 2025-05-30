@@ -101,7 +101,7 @@ def public_ip(proxy: Optional[str] = None) -> str:
         "https://ipecho.net/plain",
     ]
 
-    exception = None
+    last_exception = None
     for url in URLS:
         try:
             with _suppress_insecure_warning():
@@ -116,5 +116,6 @@ def public_ip(proxy: Optional[str] = None) -> str:
             validate_ip(ip)
             return ip
         except (requests.exceptions.ProxyError, requests.RequestException, InvalidIP) as exception:
+            last_exception = exception
             pass
-    raise InvalidIP(f"Failed to get IP address: {exception}")
+    raise InvalidIP(f"Failed to get IP address: {last_exception}")
