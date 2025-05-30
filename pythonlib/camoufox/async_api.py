@@ -43,13 +43,13 @@ class AsyncCamoufox(PlaywrightContextManager):
         self.user_data_dir = user_data_dir
         self.storage_state_path = storage_state_path
         if fingerprint_path:
-            # ✅ 优先使用已有指纹（不会触发 callback）
-            path = Path(fingerprint_path).resolve()
-            with path.open("r") as f:
-                self.launch_options["fingerprint"] = Fingerprint(**json.load(f))
-
-        elif fingerprint_save_path:
-            # ✅ 没有传入指纹时，允许在生成后保存
+    path = Path(fingerprint_path).resolve()
+    if path.exists():
+        with path.open("r") as f:
+            self.launch_options["fingerprint"] = Fingerprint(**json.load(f))
+    else:
+        print(f"[WARN] 指纹文件不存在: {path}, 将自动生成新指纹并保存")
+        if fingerprint_save_path:
             save_path = Path(fingerprint_save_path).resolve()
 
             def _cb(fp: Fingerprint):
