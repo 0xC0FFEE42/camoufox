@@ -18,10 +18,12 @@ jobs:
           python-version: '3.12'
 
       - name: Install Poetry
+        working-directory: ./pythonlib
         run: |
           pip install poetry
 
       - name: Build wheel
+        working-directory: ./pythonlib
         run: |
           poetry install
           poetry build
