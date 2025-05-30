@@ -3,6 +3,7 @@ from functools import partial
 from typing import Any, Dict, Optional, Union, overload
 import string
 from pathlib import Path
+from browserforge.fingerprints import Fingerprint
 from playwright.async_api import (
     Browser,
     BrowserContext,
