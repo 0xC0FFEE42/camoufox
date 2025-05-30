@@ -366,7 +366,7 @@ def launch_options(
     i_know_what_im_doing: Optional[bool] = None,
     debug: Optional[bool] = None,
     virtual_display: Optional[str] = None,
-    fingerprint_callback: Optional[Callable[[Fingerprint], None]] = None
+    fingerprint_callback: Optional[Callable[[Fingerprint], None]] = None,
     **launch_options: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
