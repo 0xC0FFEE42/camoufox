@@ -43,20 +43,19 @@ class AsyncCamoufox(PlaywrightContextManager):
         self.user_data_dir = user_data_dir
         self.storage_state_path = storage_state_path
         if fingerprint_path:
-    path = Path(fingerprint_path).resolve()
-    if path.exists():
-        with path.open("r") as f:
-            self.launch_options["fingerprint"] = Fingerprint(**json.load(f))
-    else:
-        print(f"[WARN] 指纹文件不存在: {path}, 将自动生成新指纹并保存")
-        if fingerprint_save_path:
-            save_path = Path(fingerprint_save_path).resolve()
+            path = Path(fingerprint_path).resolve()
+            if path.exists():
+                with path.open("r") as f:
+                    self.launch_options["fingerprint"] = Fingerprint(**json.load(f))
+            else:
+                print(f"[WARN] 指纹文件不存在: {path}, 将自动生成新指纹并保存")
+                if fingerprint_save_path:
+                    save_path = Path(fingerprint_save_path).resolve()
 
-            def _cb(fp: Fingerprint):
-                with save_path.open("w") as f:
-                    json.dump(fp.model_dump(), f)
-
-            self.launch_options["fingerprint_callback"] = _cb
+                    def _cb(fp: Fingerprint):
+                        with save_path.open("w") as f:
+                            json.dump(fp.model_dump(), f)
+                    self.launch_options["fingerprint_callback"] = _cb
 
     async def __aenter__(self) -> Union[Browser, BrowserContext]:
         _playwright = await super().__aenter__()
