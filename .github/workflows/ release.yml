@@ -1,4 +1,4 @@
-name: Upload Local Built Wheel to GitHub Release
+name: Conditional Wheel Release
 
 on:
   push:
@@ -9,22 +9,45 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Version from wheel filename
-        id: get_version
+      - name: Find local wheel
+        id: wheel
         run: |
-          FILE=$(ls pythonlib/dist/*.whl | head -n 1)
-          echo "WHEEL_FILE=$FILE" >> $GITHUB_ENV
-          VERSION=$(basename $FILE | cut -d- -f2)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+          file=$(ls pythonlib/dist/*.whl 2>/dev/null || true)
+          if [ -z "$file" ]; then
+            echo "No wheel found. Skipping."
+            exit 0
+          fi
+          echo "WHEEL_FILE=$file" >> $GITHUB_ENV
+          echo "BASENAME=$(basename $file)" >> $GITHUB_ENV
 
-      - name: Create GitHub Release
+      - name: Get local wheel hash
+        id: hash
+        run: |
+          md5=$(md5sum "$WHEEL_FILE" | cut -d ' ' -f1)
+          echo "MD5_LOCAL=$md5" >> $GITHUB_ENV
+
+      - name: Check if wheel with same name already exists in release
+        id: check_remote
+        run: |
+          gh release download --repo "$GITHUB_REPOSITORY" --pattern "$BASENAME" -D tmp/ || true
+          if [ -f "tmp/$BASENAME" ]; then
+            md5_remote=$(md5sum "tmp/$BASENAME" | cut -d ' ' -f1)
+            if [ "$md5_remote" == "$MD5_LOCAL" ]; then
+              echo "Duplicate wheel detected. Skipping upload."
+              echo "SKIP=true" >> $GITHUB_ENV
+            fi
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub release and upload wheel
+        if: env.SKIP != 'true'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.get_version.outputs.tag }}
+          tag_name: v${{ github.run_number }}
           files: ${{ env.WHEEL_FILE }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
